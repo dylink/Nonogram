@@ -4,7 +4,6 @@
 #include <string>
 #include <sys/time.h>
 #include "mynng.h"
-
 /* g++ -std=c++11 s1.cpp */
 
 int main(int _ac, char** _av) {
@@ -21,10 +20,12 @@ int main(int _ac, char** _av) {
   struct timeval f_time;
   gettimeofday (&i_time, 0);
   int solved = 0;
-  for(int i = 0; i < 1000; i++) {
+
+  for(int i = 0; i < 1; i++) { //rand in max 1000 moves
     nng_t NN;
     NN.copy(N);
-    NN.playout();
+    NN.playoutMc();
+/*    NN.playout();
     if(NN.score() == 100) { // a binary game score
       gettimeofday (&f_time, 0);
       float time = ((float)(f_time.tv_sec - i_time.tv_sec)) +
@@ -34,11 +35,10 @@ int main(int _ac, char** _av) {
       NN.print_board();
       solved = 1;
       break;
-    }
+    }*/
   }
+
   if(solved == 0) printf("not solved\n");
 
   return 0;
 }
-
-

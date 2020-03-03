@@ -23,7 +23,7 @@ struct nng_t {
   int problem_sum_c_lines;
   int problem_max_nbc_lines[MAX_LINES];
   int problem_max_nbc_cols[MAX_COLS];
-  
+
   int board_lines_id[MAX_LINES][MAX_COLS];
   int board_cols_id[MAX_LINES][MAX_COLS];
   int board_max_nbc_lines[MAX_COLS];
@@ -383,6 +383,47 @@ struct nng_t {
     strh[strh_size] = '\0';
     return std::string(strh);
   }
+
+  //MonteCarlo ----------------------------------------------------------------
+
+  std::vector<nng_move_t> get_next_moves () {
+    std::vector<nng_move_t> next_moves;
+    nng_move_t move;
+    for(int i=0; i<nbl; i++){
+      for(int j=0; j<nbc; j++){
+        if(board[i][j] == WHITE){
+          move.line = i;
+          move.col = j;
+          next_moves.push_back(move);
+        }
+      }
+    }
+    return next_moves;
+  }
+
+
+  void monteCarlo (){
+    std::vector<nng_move_t> next_moves = get_next_moves();
+    if(next_moves.size() == 0){
+      return;
+    }
+    for(int i=0; i< next_moves.size(); i++){
+    }
+  }
+
+  void playoutMc (){
+    int i;
+    std::vector<nng_move_t> next_moves = get_next_moves();
+    if(next_moves.size() == 0){
+      return;
+    }
+
+    for(i=0; i< next_moves.size(); i++){
+      printf("%d et %d \n",next_moves[i].line, next_moves[i].col);
+    }
+    printf("%d here\n", i);
+  }
+
 
 };
 #endif /* MYNNG_H */
