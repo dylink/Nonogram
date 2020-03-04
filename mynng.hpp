@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
+#include <iostream>
 #define WHITE 0
 #define BLACK 1
 char* cboard = (char*)".X";
@@ -355,6 +356,7 @@ struct nng_t {
   void playout() {
     while( ! terminal()) {
       nng_move_t m = get_rand_move();
+      //print_board();
       play(m);
     }
   }
@@ -411,6 +413,17 @@ struct nng_t {
     }
   }
 */
+
+  int copyArray (int t[MAX_LINES][MAX_COLS]){
+    int c[MAX_LINES][MAX_COLS];
+    for(int i=0; i<MAX_LINES; i++){
+      for(int j=0; j<MAX_COLS; j++){
+        c[i][j] = t[i][j];
+      }
+    }
+    return c[MAX_LINES][MAX_COLS];
+  }
+
   nng_move_t monteCarlo (){
     int i, max,wi;
     nng_move_t best;
@@ -420,24 +433,41 @@ struct nng_t {
     }
     best = next_moves[0];
     max = 0;
-    int copyboard[MAX_LINES][MAX_COLS] = {board[MAX_LINES][MAX_COLS]};
+    //int copyboard[MAX_LINES][MAX_COLS] = {board[MAX_LINES][MAX_COLS]};
+    //int copyboard[MAX_LINES][MAX_COLS] = copyArray(board[MAX_LINES][MAX_COLS]);
+    int copyboard[MAX_LINES][MAX_COLS];
+    for(int i=0; i<MAX_LINES; i++){
+      for(int j=0; j<MAX_COLS; j++){
+        copyboard[i][j] = board[i][j];
+      }
+    }
 
     for(nng_move_t m : next_moves ){
+      nb_val_set = 1;
       play(m);
       wi = 0;
-      for(int j=0; j< 500; j++){
+      for(int j=0; j< 10; j++){
         playout();
-        if(score()==100){
-          wi++;
+        //if(score()==100){
+        if(terminal() == true){
           print_board();
+          printf("Tamer\n");
+          wi++;
+        }
+        if(wi>max){
+          best =m;
+          max = wi;
         }
       }
-      if(wi>max){
-        best =m;
-        max = wi;
-      }
 
-      board[MAX_LINES][MAX_COLS] = copyboard[MAX_LINES][MAX_COLS];
+
+      //board[MAX_LINES][MAX_COLS] = copyboard[MAX_LINES][MAX_COLS];
+      //board[MAX_LINES][MAX_COLS] = copyArray(copyboard[MAX_LINES][MAX_COLS]);
+      for(int i=0; i<MAX_LINES; i++){
+        for(int j=0; j<MAX_COLS; j++){
+          board[i][j] = copyboard[i][j];
+        }
+      }
 
     }
     return best;
