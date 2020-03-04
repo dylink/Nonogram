@@ -1,0 +1,8 @@
+Heuristique :
+  1. Traiter next_moves pour éviter d'ajouter trop de cases sur une ligne/colonne
+  2. Implémenter ligne complète
+  3. Implémenter le nbNoir == nbligne -1 ^ nbcolonne -1 -> compléter
+
+MonteCarlo TreeSearch :
+
+  1. Implémenter le MCTS

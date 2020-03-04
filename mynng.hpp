@@ -361,7 +361,7 @@ struct nng_t {
       nng_move_t m = get_rand_move();
       move = m;
       play(m);
-      print_board();
+      //print_board();
     }
   }
   // binary game score OR GGP-like score : 0=lost 100=win
@@ -418,8 +418,8 @@ struct nng_t {
   }
 */
 
-  nng_move_t monteCarlo (){
-    int max,wi;
+  /*nng_move_t monteCarlo (){
+    int wi;
     nng_move_t best;
     std::vector<nng_move_t> next_moves = get_next_moves();
     srand(4);
@@ -448,10 +448,10 @@ struct nng_t {
           printf("Tamer\n");
           wi++;
         }
-        /*if(wi>max){
+        if(wi>max){
           best =move;
           max = wi;
-        }*/
+        }
         for(int i=0; i<MAX_LINES; i++){
           for(int j=0; j<MAX_COLS; j++){
             board[i][j] = copyboard[i][j];
@@ -466,7 +466,7 @@ struct nng_t {
 
     //}
     return best;
-  }
+  }*/
 
 
 
