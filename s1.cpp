@@ -10,6 +10,7 @@ int main(int _ac, char** _av) {
   //if(_ac != 2) { printf("usage: %s NONOGRAM_INPUT_FILE\n", _av[0]); return 0; }
   srand(1);
   nng_t N;
+  nng_move_t best;
   //N.load(_av[1]);
   N.load((char*)"problems/nonogram3x3_1_game.txt");
   //N.load((char*)"problems/nonogram5x5_1_game.txt");
@@ -19,29 +20,36 @@ int main(int _ac, char** _av) {
   struct timeval i_time;
   struct timeval f_time;
   gettimeofday (&i_time, 0);
-  int solved = 0;
-  nng_t NN;
-  NN.copy(N);
-  NN.monteCarlo();
-
-  for(int i = 0; i < 1000; i++) { //rand in max 1000 moves
-  //  nng_t NN;
-  //  NN.copy(N);
-  //  NN.monteCarlo();
-/*    NN.playout();
-    if(NN.score() == 100) { // a binary game score
-      gettimeofday (&f_time, 0);
-      float time = ((float)(f_time.tv_sec - i_time.tv_sec)) +
+  int max = 0, wi = 0;
+  //NN.monteCarlo();
+  std::vector<nng_move_t> moves = N.get_next_moves();
+  for(auto m : moves){
+    nng_t NN;
+    NN.copy(N);
+    NN.play(m);
+    for(int i = 0; i < 1000; i++) { //rand in max 1000 moves
+      wi = 0;
+      NN.copy(N);
+      NN.playout();
+      if(NN.score() == 100) { // a binary game score
+        /*gettimeofday (&f_time, 0);
+        float time = ((float)(f_time.tv_sec - i_time.tv_sec)) +
         ((float)(f_time.tv_usec - i_time.tv_usec))/1000000.0;
-      printf("solved after %d iterations time %.2f\n", i, time);
-      //NN.print_board_info();
-      NN.print_board();
-      solved = 1;
-      break;
-    }*/
+        printf("solved after %d iterations time %.2f\n", i, time);
+        //NN.print_board_info();*/
+        //NN.print_board();
+        wi++;
+        //break;
+      }
+    }
+    if(wi>max){
+      best =m;
+      max = wi;
+    }
   }
 
-  if(solved == 0) printf("not solved\n");
+
+  //if(solved == 0) printf("not solved\n");
 
   return 0;
 }

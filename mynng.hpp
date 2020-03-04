@@ -37,6 +37,8 @@ struct nng_t {
   int board[MAX_LINES][MAX_COLS];
   int nb_val_set;
 
+  nng_move_t move;
+
   void print_board() {
     printf("problem_sum_c_lines: %d\n", problem_sum_c_lines);
     printf("nb_val_set: %d\n", nb_val_set);
@@ -354,9 +356,10 @@ struct nng_t {
     return true;
   }
   void playout() {
-    printf("debuuuuut en bas \n");
+    //printf("debuuuuut en bas \n");
     while( ! terminal()) {
       nng_move_t m = get_rand_move();
+      move = m;
       play(m);
       print_board();
     }
@@ -416,9 +419,10 @@ struct nng_t {
 */
 
   nng_move_t monteCarlo (){
-    int i, max,wi;
+    int max,wi;
     nng_move_t best;
     std::vector<nng_move_t> next_moves = get_next_moves();
+    srand(4);
     if(next_moves.size() == 0){
       return best;
     }
@@ -427,42 +431,40 @@ struct nng_t {
     //int copyboard[MAX_LINES][MAX_COLS] = {board[MAX_LINES][MAX_COLS]};
     //int copyboard[MAX_LINES][MAX_COLS] = copyArray(board[MAX_LINES][MAX_COLS]);
     int copyboard[MAX_LINES][MAX_COLS];
-    for(int i=0; i<MAX_LINES; i++){
-      for(int j=0; j<MAX_COLS; j++){
-        copyboard[i][j] = board[i][j];
-      }
-    }
+    memcpy(board, &copyboard, sizeof(int));
 
-    for(nng_move_t m : next_moves ){
-      nb_val_set = 0;
-      play(m);
-      //print_board();
+    //for(nng_move_t m : next_moves ){
+      //std::cout << m.line << " && "  << m.col << "\n";
+      //play(m);
+      print_board();
 
-      wi = 0;
-      for(int j=0; j< 1; j++){
+      for(int j=0; j< 1000; j++){
+        //nb_val_set = 0;
+        wi = 0;
         playout();
-        //if(score()==100){
+        //print_board();
         if(score() == 100){
-          print_board();
+          //print_board();
           printf("Tamer\n");
           wi++;
         }
-        if(wi>max){
-          best =m;
+        /*if(wi>max){
+          best =move;
           max = wi;
+        }*/
+        for(int i=0; i<MAX_LINES; i++){
+          for(int j=0; j<MAX_COLS; j++){
+            board[i][j] = copyboard[i][j];
+          }
         }
       }
 
 
       //board[MAX_LINES][MAX_COLS] = copyboard[MAX_LINES][MAX_COLS];
       //board[MAX_LINES][MAX_COLS] = copyArray(copyboard[MAX_LINES][MAX_COLS]);
-      for(int i=0; i<MAX_LINES; i++){
-        for(int j=0; j<MAX_COLS; j++){
-          board[i][j] = copyboard[i][j];
-        }
-      }
 
-    }
+
+    //}
     return best;
   }
 
