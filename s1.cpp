@@ -3,7 +3,7 @@
 #include <string.h>
 #include <string>
 #include <sys/time.h>
-#include "mynng.h"
+#include "mynng.hpp"
 /* g++ -std=c++11 s1.cpp */
 
 int main(int _ac, char** _av) {
@@ -20,11 +20,14 @@ int main(int _ac, char** _av) {
   struct timeval f_time;
   gettimeofday (&i_time, 0);
   int solved = 0;
+  nng_t NN;
+  NN.copy(N);
+  NN.monteCarlo();
 
-  for(int i = 0; i < 1; i++) { //rand in max 1000 moves
-    nng_t NN;
-    NN.copy(N);
-    NN.playoutMc();
+  for(int i = 0; i < 1000; i++) { //rand in max 1000 moves
+  //  nng_t NN;
+  //  NN.copy(N);
+  //  NN.monteCarlo();
 /*    NN.playout();
     if(NN.score() == 100) { // a binary game score
       gettimeofday (&f_time, 0);

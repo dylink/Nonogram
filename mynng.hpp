@@ -402,7 +402,7 @@ struct nng_t {
   }
 
 
-  void monteCarlo (){
+  /*void monteCarlo (){
     std::vector<nng_move_t> next_moves = get_next_moves();
     if(next_moves.size() == 0){
       return;
@@ -410,20 +410,49 @@ struct nng_t {
     for(int i=0; i< next_moves.size(); i++){
     }
   }
-
-  void playoutMc (){
-    int i;
+*/
+  nng_move_t monteCarlo (){
+    int i, max,wi;
+    nng_move_t best;
     std::vector<nng_move_t> next_moves = get_next_moves();
     if(next_moves.size() == 0){
-      return;
+      return best;
     }
+    best = next_moves[0];
+    max = 0;
+    int copyboard[MAX_LINES][MAX_COLS] = {board[MAX_LINES][MAX_COLS]};
 
-    for(i=0; i< next_moves.size(); i++){
-      printf("%d et %d \n",next_moves[i].line, next_moves[i].col);
+    for(nng_move_t m : next_moves ){
+      play(m);
+      wi = 0;
+      for(int j=0; j< 500; j++){
+        playout();
+        if(score()==100){
+          wi++;
+          print_board();
+        }
+      }
+      if(wi>max){
+        best =m;
+        max = wi;
+      }
+
+      board[MAX_LINES][MAX_COLS] = copyboard[MAX_LINES][MAX_COLS];
+
     }
-    printf("%d here\n", i);
+    return best;
   }
 
+
+
+
+  /*
+  for(i=0; i< next_moves.size(); i++){
+        printf("%d et %d \n",next_moves[i].line, next_moves[i].col);
+      }
+      printf("%d here\n", i);
+    }
+    */
 
 };
 #endif /* MYNNG_H */
