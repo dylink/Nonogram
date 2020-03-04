@@ -354,10 +354,11 @@ struct nng_t {
     return true;
   }
   void playout() {
+    printf("debuuuuut en bas \n");
     while( ! terminal()) {
       nng_move_t m = get_rand_move();
-      //print_board();
       play(m);
+      print_board();
     }
   }
   // binary game score OR GGP-like score : 0=lost 100=win
@@ -414,16 +415,6 @@ struct nng_t {
   }
 */
 
-  int copyArray (int t[MAX_LINES][MAX_COLS]){
-    int c[MAX_LINES][MAX_COLS];
-    for(int i=0; i<MAX_LINES; i++){
-      for(int j=0; j<MAX_COLS; j++){
-        c[i][j] = t[i][j];
-      }
-    }
-    return c[MAX_LINES][MAX_COLS];
-  }
-
   nng_move_t monteCarlo (){
     int i, max,wi;
     nng_move_t best;
@@ -443,13 +434,15 @@ struct nng_t {
     }
 
     for(nng_move_t m : next_moves ){
-      nb_val_set = 1;
+      nb_val_set = 0;
       play(m);
+      //print_board();
+
       wi = 0;
-      for(int j=0; j< 10; j++){
+      for(int j=0; j< 1; j++){
         playout();
         //if(score()==100){
-        if(terminal() == true){
+        if(score() == 100){
           print_board();
           printf("Tamer\n");
           wi++;
