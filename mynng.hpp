@@ -326,7 +326,9 @@ struct nng_t {
   std::vector<nng_move_t> get_all_moves() {
     std::vector<nng_move_t> ret;
     for(int i = 0; i < nbl; i++) {
+      if(board_max_nbc_lines[i] == problem_max_nbc_lines[i]) continue;
       for(int j = 0; j < nbc; j++) {
+        if(board_max_nbc_cols[j] == problem_max_nbc_cols[j]) continue;
         if(board[i][j] == WHITE) {
           nng_move_t mm;
           mm.line = i; mm.col = j;
@@ -337,12 +339,76 @@ struct nng_t {
     return ret;
   }
 
+  void fill(){
+    nng_move_t m;
+    for(int i = 0; i < nbl; i++){
+      if(problem_max_nbc_lines[i] == nbl){
+        for(int j = 0; j < nbc; j++){
+          m.line = i; m.col = j;
+          play(m);
+        }
+        continue;
+      }
+      if(problem_nb_c_lines[i] == 2){
+        if(problem_c_lines[i][0] + problem_c_lines[i][1] == nbl-1){
+          int step = 0;
+          for(int j = 0; j < 2; j++){
+            for(int x = 0; x < problem_c_lines[i][j]; x++, step++){
+              //std::cout << "Oui\n";
+              m.line = i; m.col = step;
+              play(m);
+            }
+            step++;
+          }
+          continue;
+        }
+      }
+      if(problem_max_nbc_lines[i] > (nbc/2)){
+        for(int j = nbc - problem_max_nbc_lines[i]; j < nbc - (nbc - problem_max_nbc_lines[i]); j++){
+          m.line = i; m.col = j;
+          play(m);
+        }
+      }
+    }
+    for(int i = 0; i < nbc; i++){
+      if(problem_max_nbc_cols[i] == nbc){
+        for(int j = 0; j<nbl; j++){
+          m.line = j; m.col = i;
+          play(m);
+        }
+        continue;
+      }
+      if(problem_nb_c_cols[i] == 2){
+        if(problem_c_cols[i][0] + problem_c_cols[i][1] == nbc-1){
+          int step = 0;
+          for(int j = 0; j < 2; j++){
+            for(int x = 0; x < problem_c_cols[i][j]; x++, step++){
+              //std::cout << "Oui\n";
+              m.line = step; m.col = i;
+              play(m);
+            }
+            step++;
+          }
+          continue;
+        }
+      }
+      if(problem_max_nbc_cols[i] > (nbl/2)){
+        for(int j = nbl - problem_max_nbc_cols[i]; j < nbl - (nbl - problem_max_nbc_cols[i]); j++){
+          m.line = j; m.col = i;
+          play(m);
+        }
+      }
+    }
+  }
+
 
   void play(nng_move_t _m) {
-    board[_m.line][_m.col] = BLACK;
-    set_line_id(_m.line);
-    set_col_id(_m.col);
-    nb_val_set++;
+    if(board[_m.line][_m.col] != BLACK){
+      board[_m.line][_m.col] = BLACK;
+      set_line_id(_m.line);
+      set_col_id(_m.col);
+      nb_val_set++;
+    }
   }
   // GGP-like endgame
   // if the longest group is longer than the longest constraint
@@ -373,6 +439,7 @@ struct nng_t {
         if(board_c_cols[i][j] != problem_c_cols[i][j]) return false;
     }
     // all are equals... so potentially the solution
+    //print_board();
     return true;
   }
   void playout() {
@@ -380,7 +447,7 @@ struct nng_t {
       nng_move_t m = get_rand_move();
       move = m;
       play(m);
-      //print_board();
+      //if(terminal()) print_board();
     }
   }
   // binary game score OR GGP-like score : 0=lost 100=win
@@ -396,19 +463,6 @@ struct nng_t {
         if(board_c_cols[i][j] != problem_c_cols[i][j]) return 0;
     }
     return 100;
-  }
-
-  int heuristic(){
-    for(int i = 0; i < nbl; i++) {
-      if(board_nb_c_lines[i] != problem_nb_c_lines[i]) return 0;
-      for(int j = 0; j < problem_nb_c_lines[i]; j++)
-        if(board_c_lines[i][j] != problem_c_lines[i][j]) return 0;
-    }
-    for(int i = 0; i < nbc; i++) {
-      if(board_nb_c_cols[i] != problem_nb_c_cols[i]) return 0;
-      for(int j = 0; j < problem_nb_c_cols[i]; j++)
-        if(board_c_cols[i][j] != problem_c_cols[i][j]) return 0;
-    }
   }
 
   std::string mkH() {

@@ -40,32 +40,39 @@ void methodeBase(){
 nng_move_t MonteCarlo(){
   srand(1);
   nng_t N;
-  nng_move_t best;
-  N.load((char*)"problems/nonogram5x5_3_game.txt");
+  nng_move_t best, best2;
+  N.load((char*)"problems/nonogram5x5_2_game.txt");
   N.print_problem_info();
-  N.print_board();
   int max = 0, wi = 0;
+  /*best.line = 0; best.col = 1; best2.line = 2; best2.col = 2;
+  N.play(best); N.play(best2);*/
+  N.print_board();
+  N.fill();
   std::vector<nng_move_t> moves = N.get_all_moves();
+  for(auto i : moves){
+    std::cout << i.line << " && " << i.col << "\n";
+  }
+  N.print_board();
   for(auto m : moves){
     nng_t NN;
     NN.copy(N);
     NN.play(m);
     wi = 0;
-    for(int i = 0; i < 1000; i++) {
+    for(int i = 0; i < 10000; i++) {
       NN.copy(N);
       NN.playout();
       if(NN.score() == 100) {
-        //NN.print_board();
+        NN.print_board();
         wi++;
       }
     }
     if(wi>max){
-      std::cout << wi << std::endl;
+      //std::cout << wi << std::endl;
       best =m;
       max = wi;
     }
   }
-  std::cout << best.line << " && " << best.col << "\n";
+  //std::cout << best.line << " && " << best.col << "\n";
   return best;
 }
 
