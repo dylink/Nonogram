@@ -41,11 +41,11 @@ nng_move_t MonteCarlo(){
   srand(1);
   nng_t N;
   nng_move_t best;
-  N.load((char*)"problems/nonogram3x3_1_game.txt");
+  N.load((char*)"problems/nonogram5x5_3_game.txt");
   N.print_problem_info();
   N.print_board();
   int max = 0, wi = 0;
-  std::vector<nng_move_t> moves = N.get_next_moves();
+  std::vector<nng_move_t> moves = N.get_all_moves();
   for(auto m : moves){
     nng_t NN;
     NN.copy(N);

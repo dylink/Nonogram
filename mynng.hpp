@@ -112,9 +112,13 @@ struct nng_t {
       printf("%d ", problem_max_nbc_cols[i]);
     printf("\n");
   }
+
+
   void copy(nng_t& _n) {
     memcpy(this, &_n, sizeof(nng_t));
   }
+
+
   void init(int _nbl, int _nbc) {
     nbl = _nbl; nbc = _nbc;
     for(int i = 0; i < nbl; i++)
@@ -133,6 +137,8 @@ struct nng_t {
     }
     nb_val_set = 0;
   }
+
+
   void set_max() {
     for(int i = 0; i < nbl; i++) {
       problem_max_nbc_lines[i] = 0;
@@ -147,6 +153,8 @@ struct nng_t {
       }
     }
   }
+
+
   void set_line_id(int _lid) {
     for(int i = 0; i < nbc; i++) board_lines_id[_lid][i] = -1;
     int curr_id = 0;
@@ -185,6 +193,8 @@ struct nng_t {
     }
     board_max_nbc_lines[_lid] = best_lines_size;
   }
+
+
   void set_col_id(int _cid) {
     for(int i = 0; i < nbl; i++) board_cols_id[i][_cid] = -1;
     int curr_id = 0;
@@ -223,6 +233,8 @@ struct nng_t {
     }
     board_max_nbc_cols[_cid] = best_cols_size;
   }
+
+
   void load(char* _file) {
     FILE* fp;
     if ((fp = fopen(_file,"r")) == 0) {
@@ -274,6 +286,8 @@ struct nng_t {
     }
     set_max();
   }
+
+
   nng_move_t get_rand_move() {
     nng_move_t ret;
     int r = ((int)rand())%((nbl*nbc)-nb_val_set);
@@ -288,9 +302,11 @@ struct nng_t {
     printf("ERROR : NO RAND MOVE\n"); exit(0);
     return ret;
   }
+
   int get_nb_moves() {
     return (nbl*nbc)-nb_val_set;
   }
+
   nng_move_t get_move(int _id) {
     nng_move_t ret;
     int id = _id;
@@ -305,6 +321,8 @@ struct nng_t {
     printf("ERROR : NO %d MOVE\n", _id); exit(0);
     return ret;
   }
+
+
   std::vector<nng_move_t> get_all_moves() {
     std::vector<nng_move_t> ret;
     for(int i = 0; i < nbl; i++) {
@@ -318,6 +336,8 @@ struct nng_t {
     }
     return ret;
   }
+
+
   void play(nng_move_t _m) {
     board[_m.line][_m.col] = BLACK;
     set_line_id(_m.line);
@@ -356,7 +376,6 @@ struct nng_t {
     return true;
   }
   void playout() {
-    //printf("debuuuuut en bas \n");
     while( ! terminal()) {
       nng_move_t m = get_rand_move();
       move = m;
@@ -378,6 +397,20 @@ struct nng_t {
     }
     return 100;
   }
+
+  int heuristic(){
+    for(int i = 0; i < nbl; i++) {
+      if(board_nb_c_lines[i] != problem_nb_c_lines[i]) return 0;
+      for(int j = 0; j < problem_nb_c_lines[i]; j++)
+        if(board_c_lines[i][j] != problem_c_lines[i][j]) return 0;
+    }
+    for(int i = 0; i < nbc; i++) {
+      if(board_nb_c_cols[i] != problem_nb_c_cols[i]) return 0;
+      for(int j = 0; j < problem_nb_c_cols[i]; j++)
+        if(board_c_cols[i][j] != problem_c_cols[i][j]) return 0;
+    }
+  }
+
   std::string mkH() {
     static char strh[1024];
     int strh_size = 0;
@@ -391,21 +424,6 @@ struct nng_t {
   }
 
   //MonteCarlo ----------------------------------------------------------------
-
-  std::vector<nng_move_t> get_next_moves () {
-    std::vector<nng_move_t> next_moves;
-    nng_move_t move;
-    for(int i=0; i<nbl; i++){
-      for(int j=0; j<nbc; j++){
-        if(board[i][j] == WHITE){
-          move.line = i;
-          move.col = j;
-          next_moves.push_back(move);
-        }
-      }
-    }
-    return next_moves;
-  }
 
 
   /*void monteCarlo (){
