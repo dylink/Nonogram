@@ -1,3 +1,0 @@
-MonteCarlo TreeSearch :
-
-  1. Implémenter le MCTS

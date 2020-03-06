@@ -1,0 +1,9 @@
+//Réussi
+
+Ajout de la recherche MonteCarlo dans s1.cpp;
+
+Ajout d'une fonction "fill" qui prérempli le tableau de manière logique, et restriction des "next_moves" pour éviter les recherches inutiles
+
+//Pas réussi
+
+Monte Carlo Tree Search

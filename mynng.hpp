@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <vector>
 #include <iostream>
+#include <list>
 #define WHITE 0
 #define BLACK 1
 char* cboard = (char*)".X";
@@ -35,7 +36,7 @@ struct nng_t {
   int board_c_cols[MAX_COLS][MAX_CONSTRAINTS]; // !!! FIRST INDEX = CID
 
   int board[MAX_LINES][MAX_COLS];
-  int nb_val_set;
+  int nb_val_set, visited = 0, total_score = 0;
 
   nng_move_t move;
 
@@ -447,8 +448,10 @@ struct nng_t {
       nng_move_t m = get_rand_move();
       move = m;
       play(m);
-      //if(terminal()) print_board();
+      //print_board();
     }
+    total_score = score();
+    visited++;
   }
   // binary game score OR GGP-like score : 0=lost 100=win
   int score() {
@@ -462,6 +465,7 @@ struct nng_t {
       for(int j = 0; j < problem_nb_c_cols[i]; j++)
         if(board_c_cols[i][j] != problem_c_cols[i][j]) return 0;
     }
+    print_board();
     return 100;
   }
 
@@ -551,5 +555,25 @@ struct nng_t {
     }
     */
 
+};
+
+
+
+class Noeud {
+public:
+  nng_t etat;
+  std::list<Noeud> enfants;
+  Noeud *parent;
+  char* path;
+
+  Noeud(char* path){
+    this->etat.load(path);
+    this->path = path;
+  }
+};
+
+class Arbre{
+public:
+  Noeud racine = Noeud((char *)"problems/nonogram5x5_3_game.txt");
 };
 #endif /* MYNNG_H */
