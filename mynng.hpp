@@ -5,12 +5,18 @@
 #include <vector>
 #include <iostream>
 #include <list>
+
 #define WHITE 0
 #define BLACK 1
 char* cboard = (char*)".X";
 
+using namespace std;
+
 struct nng_move_t {
   int line; int col;
+  bool operator==(const nng_move_t comp){
+    return (line == comp.line && col == comp.col);
+  }
 };
 #define MAX_CONSTRAINTS 5
 #define MAX_LINES 10
@@ -23,6 +29,8 @@ struct nng_t {
   int problem_c_cols[MAX_COLS][MAX_CONSTRAINTS];
   int problem_nb_c_cols[MAX_COLS];
   int problem_sum_c_lines;
+  int problem_total_lines[MAX_LINES];
+  int problem_total_cols[MAX_COLS];
   int problem_max_nbc_lines[MAX_LINES];
   int problem_max_nbc_cols[MAX_COLS];
 
@@ -30,13 +38,15 @@ struct nng_t {
   int board_cols_id[MAX_LINES][MAX_COLS];
   int board_max_nbc_lines[MAX_COLS];
   int board_max_nbc_cols[MAX_LINES];
+  int board_total_lines[MAX_LINES];
+  int board_total_cols[MAX_COLS];
   int board_nb_c_lines[MAX_LINES];
   int board_c_lines[MAX_LINES][MAX_CONSTRAINTS]; // !!! FIRST INDEX = LID
   int board_nb_c_cols[MAX_COLS];
   int board_c_cols[MAX_COLS][MAX_CONSTRAINTS]; // !!! FIRST INDEX = CID
 
   int board[MAX_LINES][MAX_COLS];
-  int nb_val_set, visited = 0, total_score = 0;
+  int nb_val_set;
 
   nng_move_t move;
 
@@ -129,11 +139,17 @@ struct nng_t {
         board_cols_id[i][j] = -1;
       }
     for(int i = 0; i < nbc; i++) {
+      board_nb_c_lines[i] = 0;
+      board_total_lines[i] = 0;
+      problem_total_lines[i] = 0;
       board_max_nbc_lines[i] = 0;
       for(int j = 0; j < MAX_CONSTRAINTS; j++) board_c_lines[i][j] = 0;
     }
     for(int i = 0; i < nbl; i++) {
+      board_nb_c_cols[i] = 0;
       board_max_nbc_cols[i] = 0;
+      board_total_cols[i] = 0;
+      problem_total_cols[i] = 0;
       for(int j = 0; j < MAX_CONSTRAINTS; j++) board_c_cols[i][j] = 0;
     }
     nb_val_set = 0;
@@ -145,12 +161,14 @@ struct nng_t {
       problem_max_nbc_lines[i] = 0;
       for(int j = 0; j < problem_nb_c_lines[i]; j++) {
         if(problem_c_lines[i][j] > problem_max_nbc_lines[i]) problem_max_nbc_lines[i] = problem_c_lines[i][j];
+        problem_total_lines[i] += problem_c_lines[i][j];
       }
     }
     for(int i = 0; i < nbc; i++) {
       problem_max_nbc_cols[i] = 0;
       for(int j = 0; j < problem_nb_c_cols[i]; j++) {
         if(problem_c_cols[i][j] > problem_max_nbc_cols[i]) problem_max_nbc_cols[i] = problem_c_cols[i][j];
+        problem_total_cols[i] += problem_c_cols[i][j];
       }
     }
   }
@@ -193,6 +211,12 @@ struct nng_t {
       board_nb_c_lines[_lid] = curr_gid+1;
     }
     board_max_nbc_lines[_lid] = best_lines_size;
+    for(int i =0; i<nbl; i++){
+      board_total_lines[i] = 0;
+      for(int j =0; j<board_nb_c_lines[i]; j++){
+        board_total_lines[i] += board_c_lines[i][j];
+      }
+    }
   }
 
 
@@ -233,6 +257,12 @@ struct nng_t {
       board_nb_c_cols[_cid] = curr_gid+1;
     }
     board_max_nbc_cols[_cid] = best_cols_size;
+    for(int i =0; i<nbc; i++){
+      board_total_cols[i] = 0;
+      for(int j =0; j<board_nb_c_cols[i]; j++){
+        board_total_cols[i] += board_c_cols[i][j];
+      }
+    }
   }
 
 
@@ -255,6 +285,7 @@ struct nng_t {
       printf("ERROR : max_cl > 3 || max_cc > 3\n"); exit(0);
     }
     int mode = 0; /* 0:nil 1:lines 2:cols */
+    problem_sum_c_lines = 0;
     while ((read = getline(&line, &len, fp)) != -1) {
       if(strncmp(line, "lines", 5) == 0) { mode = 1; }
       else if(strncmp(line, "cols", 4) == 0) { mode = 2; }
@@ -327,9 +358,9 @@ struct nng_t {
   std::vector<nng_move_t> get_all_moves() {
     std::vector<nng_move_t> ret;
     for(int i = 0; i < nbl; i++) {
-      if(board_max_nbc_lines[i] == problem_max_nbc_lines[i]) continue;
+      if(board_total_lines[i] == problem_total_lines[i] && board_nb_c_lines[i] == problem_nb_c_lines[i]) continue;
       for(int j = 0; j < nbc; j++) {
-        if(board_max_nbc_cols[j] == problem_max_nbc_cols[j]) continue;
+        if(board_total_cols[j] == problem_total_cols[j] && board_nb_c_cols[j] == problem_nb_c_cols[j]) continue;
         if(board[i][j] == WHITE) {
           nng_move_t mm;
           mm.line = i; mm.col = j;
@@ -404,11 +435,14 @@ struct nng_t {
 
 
   void play(nng_move_t _m) {
-    if(board[_m.line][_m.col] != BLACK){
-      board[_m.line][_m.col] = BLACK;
-      set_line_id(_m.line);
-      set_col_id(_m.col);
-      nb_val_set++;
+
+    if(_m.line > -1 && _m.line < nbl && _m.col >-1 && _m.col < nbc){
+      if(board[_m.line][_m.col] != BLACK){
+        board[_m.line][_m.col] = BLACK;
+        set_line_id(_m.line);
+        set_col_id(_m.col);
+        nb_val_set++;
+      }
     }
   }
   // GGP-like endgame
@@ -441,18 +475,16 @@ struct nng_t {
     }
     // all are equals... so potentially the solution
     //print_board();
+
     return true;
   }
   void playout() {
     while( ! terminal()) {
       nng_move_t m = get_rand_move();
-      move = m;
       play(m);
-      //print_board();
     }
-    total_score = score();
-    visited++;
   }
+
   // binary game score OR GGP-like score : 0=lost 100=win
   int score() {
     for(int i = 0; i < nbl; i++) {
@@ -465,7 +497,6 @@ struct nng_t {
       for(int j = 0; j < problem_nb_c_cols[i]; j++)
         if(board_c_cols[i][j] != problem_c_cols[i][j]) return 0;
     }
-    print_board();
     return 100;
   }
 
@@ -481,99 +512,27 @@ struct nng_t {
     return std::string(strh);
   }
 
-  //MonteCarlo ----------------------------------------------------------------
-
-
-  /*void monteCarlo (){
-    std::vector<nng_move_t> next_moves = get_next_moves();
-    if(next_moves.size() == 0){
-      return;
-    }
-    for(int i=0; i< next_moves.size(); i++){
-    }
-  }
-*/
-
-  /*nng_move_t monteCarlo (){
-    int wi;
-    nng_move_t best;
-    std::vector<nng_move_t> next_moves = get_next_moves();
-    srand(4);
-    if(next_moves.size() == 0){
-      return best;
-    }
-    best = next_moves[0];
-    max = 0;
-    //int copyboard[MAX_LINES][MAX_COLS] = {board[MAX_LINES][MAX_COLS]};
-    //int copyboard[MAX_LINES][MAX_COLS] = copyArray(board[MAX_LINES][MAX_COLS]);
-    int copyboard[MAX_LINES][MAX_COLS];
-    memcpy(board, &copyboard, sizeof(int));
-
-    //for(nng_move_t m : next_moves ){
-      //std::cout << m.line << " && "  << m.col << "\n";
-      //play(m);
-      print_board();
-
-      for(int j=0; j< 1000; j++){
-        //nb_val_set = 0;
-        wi = 0;
-        playout();
-        //print_board();
-        if(score() == 100){
-          //print_board();
-          printf("Tamer\n");
-          wi++;
-        }
-        if(wi>max){
-          best =move;
-          max = wi;
-        }
-        for(int i=0; i<MAX_LINES; i++){
-          for(int j=0; j<MAX_COLS; j++){
-            board[i][j] = copyboard[i][j];
-          }
-        }
-      }
-
-
-      //board[MAX_LINES][MAX_COLS] = copyboard[MAX_LINES][MAX_COLS];
-      //board[MAX_LINES][MAX_COLS] = copyArray(copyboard[MAX_LINES][MAX_COLS]);
-
-
-    //}
-    return best;
-  }*/
-
-
-
-
-  /*
-  for(i=0; i< next_moves.size(); i++){
-        printf("%d et %d \n",next_moves[i].line, next_moves[i].col);
-      }
-      printf("%d here\n", i);
-    }
-    */
-
 };
 
 
 
-class Noeud {
-public:
-  nng_t etat;
+struct Noeud {
+
   std::list<Noeud> enfants;
   Noeud *parent;
-  char* path;
+  bool isEnd, isWon;
+  nng_move_t move;
+  int nbWins, nbVisits;
 
-  Noeud(char* path){
-    this->etat.load(path);
-    this->path = path;
+  Noeud(){
+    move.line = 0;
+    move.col = 0;
+    parent = nullptr;
+    nbWins = 0;
+    nbVisits = 0;
+    isEnd = false;
+    isWon = false;
   }
-};
 
-class Arbre{
-public:
-  Noeud racine = Noeud((char *)"problems/nonogram5x5_3_game.txt");
 };
 #endif /* MYNNG_H */

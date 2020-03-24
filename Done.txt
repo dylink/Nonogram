@@ -7,3 +7,4 @@ Ajout d'une fonction "fill" qui prérempli le tableau de manière logique, et re
 //Pas réussi
 
 Monte Carlo Tree Search
+Nested Monte Carlo Search

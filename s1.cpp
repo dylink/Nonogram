@@ -7,12 +7,11 @@
 #include <math.h>
 #include "mynng.hpp"
 
-void methodeBase(){
+void methodeBase(int bound){
   //if(_ac != 2) { printf("usage: %s NONOGRAM_INPUT_FILE\n", _av[0]); return 0; }
-  srand(4);
   nng_t N;
   //N.load(_av[1]);
-  N.load((char*)"problems/nonogram5x5_1_game.txt");
+  N.load((char*)"problems/nonogram3x3_1_game.txt");
   //N.load((char*)"problems/nonogram5x5_1_game.txt");
   //N.load((char*)"problems/nonogram10x10_1_game.txt");
   N.print_problem_info();
@@ -21,7 +20,7 @@ void methodeBase(){
   struct timeval f_time;
   gettimeofday (&i_time, 0);
   int solved = 0;
-  for(int i = 0; i < 1000000; i++) {
+  for(int i = 0; i < bound; i++) {
     nng_t NN;
     NN.copy(N);
     NN.playout();
@@ -39,201 +38,160 @@ void methodeBase(){
   if(solved == 0) printf("not solved\n");
 }
 
-float ucb(int wi, int ni, int n){
-  if(!n) return std::numeric_limits<float>::infinity();
-  return (wi/ni)+1.41*sqrt(log(n)/n);
-}
-
-/*Noeud selection(Noeud &racine){
-  Noeud noeud = racine;
-  int n = noeud.etat.visited;
-  if(!n) return noeud;
-  static float max = -1;
-  Noeud best(noeud.path);
-  std::vector<nng_move_t> moves = noeud.etat.get_all_moves();
-  int i = 0;
-  for(auto m : moves){
-    Noeud enfants = noeud;
-    enfants.etat.play(m);
-    int ni = enfants.etat.visited;
-    if(!ni) return noeud;
-    float eval = ucb(enfants.etat.total_score, ni, noeud.etat.visited);
-    if(eval > max){
-      max = eval;
-      best = enfants;
-    }
-
-  }
-  return best;
-}
-
-void backPropagation(Noeud &noeud){
-  Noeud *current = &noeud;
-  while(current != NULL){
-    if(current->parent != NULL){
-      current->etat.score();
-      current->parent->etat.total_score += current->etat.total_score;
-      current->parent->etat.visited += current->etat.visited;
-    }
-    current = current->parent;
-  }
-}
-
-Noeud expansion(Noeud &noeud){
-  std::vector<nng_move_t> moves = noeud.etat.get_all_moves();
-  Noeud copy(noeud.path);
-  copy.etat.copy(noeud.etat);
-  Noeud copy2 = copy;
-  if(!noeud.etat.visited) {
-    copy.etat.play(copy.etat.get_rand_move());
-    copy.parent = &noeud;
-    noeud.enfants.push_back(copy);
-    copy = copy2;
-  }
-  for(auto m : noeud.enfants){
-    if(!m.etat.visited) return m;
-  }
-  return noeud;
-}
-
-nng_move_t MCTS(int bound){
-  srand(1);
-  Arbre arbre;
-  nng_move_t best;
-  int max = 0;
-  Noeud racine = arbre.racine;
-  racine.etat.fill();
-  racine.etat.print_board();
-  std::vector<nng_move_t> moves = racine.etat.get_all_moves();
-  std::vector<std::pair<float, nng_move_t>> top;
-  for(int i = 0; i < bound; i++){
-    Noeud suivant = selection(racine);
-    expansion(suivant);
-    suivant.etat.playout();
-    best = suivant.etat.move;
-    backPropagation(suivant);
-    //std::cout << suivant.etat.visited << "\n";
-    //suivant.etat.print_board();
-    if(suivant.etat.total_score) std::cout << suivant.etat.total_score << "\n";
-    float score = suivant.etat.total_score / suivant.etat.visited;
-    //std::cout << score << "\n";
-    top.push_back(std::pair(score, best));
-  }
-  return best;
-}*/
-
-Noeud selection(Noeud &racine){
-  Noeud noeud = racine;
-  static float max = -1;
-  Noeud best(noeud.path);
-  std::vector<nng_move_t> moves = noeud.etat.get_all_moves();
-  for(auto m : moves){
-    Noeud enfants = noeud;
-    enfants.etat.play(m);
-    int ni = enfants.etat.visited;
-    if(!ni) return enfants;
-    float eval = ucb(enfants.etat.total_score, ni, noeud.etat.visited);
-    if(eval > max){
-      max = eval;
-      best = enfants;
-    }
-  }
-  return best;
-}
-
-Noeud expansion(Noeud &noeud){
-  std::vector<nng_move_t> moves = noeud.etat.get_all_moves();
-  Noeud copy(noeud.path);
-  copy.etat.copy(noeud.etat);
-  Noeud copy2 = copy;
-  if(!noeud.etat.visited) {
-    copy.etat.play(copy.etat.get_rand_move());
-    copy.parent = &noeud;
-    noeud.enfants.push_back(copy);
-    copy = copy2;
-  }
-  for(auto m : noeud.enfants){
-    if(!m.etat.visited) return m;
-  }
-  return noeud;
-}
-
-void backPropagation(Noeud &noeud){
-  Noeud *current = &noeud;
-  while(current != NULL){
-    if(current->parent != NULL){
-      current->parent->etat.total_score += current->etat.total_score;
-      current->parent->etat.visited += current->etat.visited;
-    }
-    current = current->parent;
-  }
-}
-
-nng_move_t MCTS(int bound){
-  srand(1);
-  Arbre arbre;
-  nng_move_t best;
-  int max = 0;
-  Noeud racine = arbre.racine;
-  racine.etat.fill();
-  racine.etat.print_board();
-  std::vector<nng_move_t> moves = racine.etat.get_all_moves();
-  std::vector<std::pair<float, nng_move_t>> top;
-  for(int i = 0; i < bound; i++){
-    Noeud suivant = selection(racine);
-    expansion(suivant);
-    suivant.etat.playout();
-    suivant.etat.score();
-    best = suivant.etat.move;
-    backPropagation(suivant);
-    if(suivant.etat.total_score) std::cout << suivant.etat.total_score << "\n";
-    float score = suivant.etat.total_score / suivant.etat.visited;
-    //std::cout << score << "\n";
-    top.push_back(std::pair(score, best));
-  }
-  return best;
-}
-
 nng_move_t MonteCarlo(int bound){
-  srand(4);
+
   nng_t N;
   nng_move_t best, best2;
-  N.load((char*)"problems/nonogram5x5_3_game.txt");
+  N.load((char*)"problems/nonogram5x5_1_game.txt");
   N.print_problem_info();
   int max = 0, wi = 0;
-  N.print_board();
   N.fill();
   std::vector<nng_move_t> moves = N.get_all_moves();
   N.print_board();
+  nng_t NN;
+  NN.copy(N);
   for(auto m : moves){
-    nng_t NN;
     NN.copy(N);
     NN.play(m);
     wi = 0;
     for(int i = 0; i < bound; i++) {
-      NN.copy(N);
-      NN.playout();
-      if(NN.score() == 100) {
-        NN.print_board();
+      nng_t NNN; NNN.copy(NN);
+      //NN.copy(N);
+      NNN.playout();
+      if(NNN.score() == 100) {
+        NNN.print_board();
         wi++;
       }
     }
     if(wi>max){
-      //std::cout << wi << std::endl;
       best =m;
       max = wi;
     }
+    NN.copy(N);
   }
-  //std::cout << best.line << " && " << best.col << "\n";
+  return best;
+}
+
+float ucb(int wi, int ni, int n){
+  if(!n) return std::numeric_limits<float>::infinity();
+  return (wi/ni)+1.41*sqrt(log(n)/ni);
+}
+
+Noeud& selection(Noeud &racine, nng_t &etat){
+  std::vector<nng_move_t> moves = etat.get_all_moves();
+  if(racine.parent != nullptr) racine.nbVisits++;
+  if(racine.enfants.empty()){
+    if(racine.isEnd) return racine;
+    for(auto m : moves){
+      Noeud copy;
+      copy.move = m;
+      copy.parent = &racine;
+      racine.enfants.push_back(copy);
+    }
+  }
+  if(racine.enfants.empty()){
+    racine.isEnd = true;
+    return racine;
+  }
+  static float max = -1;
+  Noeud temp;
+  Noeud* best = &temp;
+  for(auto& m : racine.enfants){
+    if(!m.nbVisits){
+      etat.play(m.move);
+      m.nbVisits++;
+      return m;
+    }
+    float eval = ucb(m.nbWins, m.nbVisits, racine.nbVisits);
+    if(eval > max){
+      max = eval;
+      best = &m;
+    }
+  }
+  etat.play(best->move);
+  if(etat.score() == 100){
+    return *best;
+  }
+  return selection(*best, etat);
+}
+
+void backPropagation(Noeud &noeud){
+  Noeud *current = &noeud;
+  while(current->parent != nullptr){
+    current->parent->nbVisits += current->nbVisits;
+    current->parent->nbWins += current->nbWins;
+    cout << current->parent->nbWins << " Oui\n";
+    current = current->parent;
+  }
+}
+
+Noeud MCTS(int bound, Noeud &racine, nng_t &etat){
+  Noeud best;
+  float max = 0;
+  nng_move_t move;
+  move.line = 0; move.col = 1;
+  //etat.play(move);
+
+  etat.fill();
+  etat.print_board();
+  //return best;
+  std::vector<nng_move_t> moves = etat.get_all_moves();
+  for(int i = 0; i < bound; i++){
+    nng_t copy; copy.copy(etat);
+    Noeud& suivant = selection(racine, copy);
+    if(copy.score() == 100){
+      cout << "YEEEEEEEEEEES" << "\n";
+      suivant.nbWins++;
+    }
+    copy.playout();
+    copy.print_board();
+    //copy.print_board();
+    if(copy.score() == 100){
+      cout << "YEEEEEEEEEEES" << "\n";
+      suivant.nbWins++;
+      cout << suivant.nbVisits << "\n";
+      return best;
+    }
+    cout << i << "\n";
+    backPropagation(suivant);
+    //if(i==20) return best;
+  }
+  for(auto m : racine.enfants){
+
+    //float score = m.nbWins / m.nbVisits;
+
+    if(10 >= max){
+      max = 10;
+      best = m;
+    }
+
+  }
   return best;
 }
 
 
 int main(int _ac, char** _av) {
-
-  //methodeBase();
-  //MonteCarlo(10000);
-  MCTS(100000);
-
+  srand((time(NULL)));
+  nng_move_t best;
+  //methodeBase(1000);
+  /*best = MonteCarlo(10000);
+  cout << best.line << " && " << best.col << "\n";*/
+  Noeud racine;
+  nng_t nono; nono.load((char*)"problems/nonogram5x5_2_game.txt");
+  /*nng_move_t move;
+  move.line = 0; move.col = 1;
+  nono.play(move);
+  move.line = 1; move.col = 0;
+  nono.play(move);*/
+  //cout << nono.board_total_lines[0] << "\n";
+  nono.print_board();
+  //nono.fill();
+  /*vector<nng_move_t> next = nono.get_all_moves();
+  for(auto m : next){
+    cout << m.line << " && " << m.col << "\n";
+  }*/
+  //racine.etat.print_board();
+  Noeud tg;
+  tg = MCTS(100, racine, nono);
   return 0;
 }
