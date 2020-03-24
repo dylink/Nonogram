@@ -482,6 +482,10 @@ struct nng_t {
     while( ! terminal()) {
       nng_move_t m = get_rand_move();
       play(m);
+<<<<<<< HEAD
+=======
+      print_board();
+>>>>>>> f3e9df7d43741b6227bbc8269e23432afaf4c099
     }
   }
 
@@ -520,6 +524,7 @@ struct Noeud {
 
   std::list<Noeud> enfants;
   Noeud *parent;
+<<<<<<< HEAD
   bool isEnd, isWon;
   nng_move_t move;
   int nbWins, nbVisits;
@@ -533,6 +538,11 @@ struct Noeud {
     isEnd = false;
     isWon = false;
   }
+=======
+  char* path;
+
+  Noeud(char* path) : path(path) {}
+>>>>>>> f3e9df7d43741b6227bbc8269e23432afaf4c099
 
 };
 #endif /* MYNNG_H */

@@ -125,6 +125,7 @@ void backPropagation(Noeud &noeud){
   }
 }
 
+<<<<<<< HEAD
 Noeud MCTS(int bound, Noeud &racine, nng_t &etat){
   Noeud best;
   float max = 0;
@@ -155,6 +156,24 @@ Noeud MCTS(int bound, Noeud &racine, nng_t &etat){
     cout << i << "\n";
     backPropagation(suivant);
     //if(i==20) return best;
+=======
+Noeud MCTS(int bound, Noeud &racine){
+  Noeud best(racine.path);
+  float max = 0;
+  racine.etat.fill();
+  racine.etat.print_board();
+  std::vector<nng_move_t> moves = racine.etat.get_all_moves();
+  for(int i = 0; i < bound; i++){
+    Noeud suivant = selection(racine);
+    Noeud suivant2 = expansion(suivant);
+    suivant2.etat.playout();
+    backPropagation(suivant2);
+    float score = suivant2.etat.total_score / suivant2.etat.visited;
+    if(score >= max){
+      best = suivant2;
+    }
+    if(i == 10){ std::cout << racine.etat.visited << "\n"; break;}
+>>>>>>> f3e9df7d43741b6227bbc8269e23432afaf4c099
   }
   for(auto m : racine.enfants){
 
@@ -171,6 +190,7 @@ Noeud MCTS(int bound, Noeud &racine, nng_t &etat){
 
 
 int main(int _ac, char** _av) {
+<<<<<<< HEAD
   srand((time(NULL)));
   nng_move_t best;
   //methodeBase(1000);
@@ -193,5 +213,13 @@ int main(int _ac, char** _av) {
   //racine.etat.print_board();
   Noeud tg;
   tg = MCTS(100, racine, nono);
+=======
+
+  //methodeBase();
+  //MonteCarlo(10000);
+  Noeud racine((char *)"problems/nonogram5x5_3_game.txt");
+  MCTS(10, racine);
+
+>>>>>>> f3e9df7d43741b6227bbc8269e23432afaf4c099
   return 0;
 }
