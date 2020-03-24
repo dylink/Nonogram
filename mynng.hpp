@@ -448,7 +448,7 @@ struct nng_t {
       nng_move_t m = get_rand_move();
       move = m;
       play(m);
-      //print_board();
+      print_board();
     }
     total_score = score();
     visited++;
@@ -566,14 +566,7 @@ public:
   Noeud *parent;
   char* path;
 
-  Noeud(char* path){
-    this->etat.load(path);
-    this->path = path;
-  }
-};
+  Noeud(char* path) : path(path) {}
 
-class Arbre{
-public:
-  Noeud racine = Noeud((char *)"problems/nonogram5x5_3_game.txt");
 };
 #endif /* MYNNG_H */
